@@ -2244,7 +2244,9 @@ function library:window(properties)
 
 		playerlist.Visible = flags["player_list"] and bool or false
 	end
-
+function cfg.toggle_preview(state)
+        esp_preview.Visible = state
+    end
 	return setmetatable(cfg, library)
 end
 
