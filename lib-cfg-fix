@@ -2273,6 +2273,87 @@ function cfg.preview_filler(bool)
 function cfg.toggle_preview(state)
         esp_preview.Visible = state
     end
+	-- // [FIXED] LINKING FUNCTIONS (Paste inside library:window) // --
+
+    -- 1. Text Casing Helper (Internal)
+    local current_font_state = { size = 12, face = library.font, casing = "Lower case" }
+    
+    local function ApplyCasing(text, mode)
+        if not text then return "" end
+        if mode == "UPPER CASE" then return text:upper()
+        elseif mode == "lower case" then return text:lower()
+        elseif mode == "Sentence case" then return text:sub(1,1):upper()..text:sub(2):lower()
+        elseif mode == "Pascal Case" then return text:gsub("(%a)([%w]*)", function(a,b) return a:upper()..b:lower() end)
+        else return text end -- None
+    end
+
+    local function UpdateAllText()
+        -- Original strings to re-format
+        local raw_name = "player"
+        local raw_weapon = "double barrel"
+        local raw_dist = "100m"
+
+        if player_name then 
+            player_name.Text = ApplyCasing(raw_name, current_font_state.casing)
+            player_name.TextSize = current_font_state.size
+            player_name.FontFace = current_font_state.face
+        end
+        if weapon then 
+            weapon.Text = ApplyCasing(raw_weapon, current_font_state.casing)
+            weapon.TextSize = current_font_state.size
+            weapon.FontFace = current_font_state.face
+        end
+        if distance then 
+            distance.Text = ApplyCasing(raw_dist, current_font_state.casing)
+            distance.TextSize = current_font_state.size
+            distance.FontFace = current_font_state.face
+        end
+    end
+
+    -- 2. Public Setter Functions
+    function cfg.set_font_data(type, value)
+        if type == "size" then current_font_state.size = value end
+        if type == "face" then current_font_state.face = value end
+        if type == "casing" then current_font_state.casing = value end
+        UpdateAllText()
+    end
+
+    function cfg.preview_distance(bool)
+        if distance then distance.Visible = bool end
+    end
+
+    function cfg.set_box_color(color)
+        if box_color then box_color.Color = color end
+        if BoxLine2 then BoxLine2.Color = color end
+        if corner_box then
+            for _, v in next, corner_box:GetChildren() do
+                if v:IsA("Frame") then v.BorderColor3 = color end
+            end
+        end
+    end
+
+    function cfg.set_fill_color(color)
+        if gradient then 
+            gradient.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, color),
+                ColorSequenceKeypoint.new(1, color)
+            }
+        end
+    end
+
+    function cfg.set_chams_color(color)
+        if hitpart then
+            for _, part in next, hitpart:GetChildren() do
+                part.BackgroundColor3 = color
+            end
+        end
+    end
+
+    function cfg.set_text_color(color)
+        if player_name then player_name.TextColor3 = color end
+        if weapon then weapon.TextColor3 = color end
+        if distance then distance.TextColor3 = color end
+    end
 	return setmetatable(cfg, library)
 end
 
@@ -5253,38 +5334,6 @@ function library:textbox(properties)
 	end
 
 	library.config_flags[cfg.flag] = cfg.set
--- [ADD] Linking Functions
-    function cfg.preview_distance(bool)
-        if distance then distance.Visible = bool end
-    end
-
-    function cfg.set_box_color(color)
-        if box_color then box_color.Color = color end
-        if BoxLine2 then BoxLine2.Color = color end
-        if corner_box then
-            for _, v in next, corner_box:GetChildren() do
-                if v:IsA("Frame") then v.BorderColor3 = color end
-            end
-        end
-    end
-
-    function cfg.set_fill_color(color)
-        if gradient then gradient.Color = ColorSequence.new(color) end
-    end
-
-    function cfg.set_chams_color(color)
-        if hitpart then
-            for _, part in next, hitpart:GetChildren() do
-                part.BackgroundColor3 = color
-            end
-        end
-    end
-
-    function cfg.set_text_color(color)
-        if player_name then player_name.TextColor3 = color end
-        if weapon then weapon.TextColor3 = color end
-        if distance then distance.TextColor3 = color end
-    end
 	return setmetatable(cfg, library)
 end
 
