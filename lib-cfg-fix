@@ -1391,10 +1391,13 @@ function library:window(properties)
 		}),
 	})
 
-	function cfg.preview_filler(bool)
-		line_holder.BackgroundTransparency = bool and 0 or 1
-		gradient.Enabled = bool
-	end
+function cfg.preview_filler(bool)
+        local holder = line_holder or (gradient and gradient.Parent)
+        if holder then
+            holder.BackgroundTransparency = bool and 0 or 1
+        end
+        if gradient then gradient.Enabled = bool end
+    end
 
 	local top_holder = library:create("Frame", {
 		Parent = line_holder,
@@ -5250,7 +5253,38 @@ function library:textbox(properties)
 	end
 
 	library.config_flags[cfg.flag] = cfg.set
+-- [ADD] Linking Functions
+    function cfg.preview_distance(bool)
+        if distance then distance.Visible = bool end
+    end
 
+    function cfg.set_box_color(color)
+        if box_color then box_color.Color = color end
+        if BoxLine2 then BoxLine2.Color = color end
+        if corner_box then
+            for _, v in next, corner_box:GetChildren() do
+                if v:IsA("Frame") then v.BorderColor3 = color end
+            end
+        end
+    end
+
+    function cfg.set_fill_color(color)
+        if gradient then gradient.Color = ColorSequence.new(color) end
+    end
+
+    function cfg.set_chams_color(color)
+        if hitpart then
+            for _, part in next, hitpart:GetChildren() do
+                part.BackgroundColor3 = color
+            end
+        end
+    end
+
+    function cfg.set_text_color(color)
+        if player_name then player_name.TextColor3 = color end
+        if weapon then weapon.TextColor3 = color end
+        if distance then distance.TextColor3 = color end
+    end
 	return setmetatable(cfg, library)
 end
 
