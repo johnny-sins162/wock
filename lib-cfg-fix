@@ -1335,7 +1335,12 @@ function library:window(properties)
 		BorderSizePixel = 0,
 		BackgroundColor3 = Color3.fromRGB(0, 255, 42),
 	})
-
+    local health_gradient = library:create("UIGradient", {
+        Parent = health_slider,
+        Name = "Gradient",
+        Enabled = false,
+        Rotation = 0 -- Vertical gradient
+    })
 	local health_text = library:create("TextLabel", {
 		Parent = health_slider,
 		Name = "",
@@ -2266,10 +2271,20 @@ function cfg.preview_filler(bool)
 	end
 
 	function cfg.set_menu_visibility(bool, pl)
-		WINDOW_PATH.Visible = bool
+        WINDOW_PATH.Visible = bool
+        
+        -- [FIX] Hide ESP Preview when menu closes
+        if not bool then
+            esp_preview.Visible = false
+        else
+            -- Restore preview if it was enabled in settings
+            if library.flags["esp_preview_visible"] then
+                esp_preview.Visible = true
+            end
+        end
 
-		playerlist.Visible = flags["player_list"] and bool or false
-	end
+        playerlist.Visible = flags["player_list"] and bool or false
+    end
 function cfg.toggle_preview(state)
         esp_preview.Visible = state
     end
