@@ -934,7 +934,40 @@ function library:window(properties)
 
 		table.insert(glow_patterns, glow)
 	end
+-- [FIX] Hide unwanted elements by default
+    armor.Visible = false
+    image_holder.Visible = false
 
+    -- [FIX] New Color & Toggle Functions
+    function cfg.preview_distance(bool)
+        distance.Visible = bool
+    end
+
+    function cfg.set_box_color(color)
+        box_color.Color = color
+        BoxLine2.Color = color -- Update outline if needed
+        for _, v in next, corner_box:GetChildren() do
+            if v:IsA("Frame") then v.BorderColor3 = color end
+        end
+    end
+
+    function cfg.set_fill_color(color)
+        -- Update gradient keys for filler
+        local old_transparency = gradient.Transparency
+        gradient.Color = ColorSequence.new(color)
+    end
+
+    function cfg.set_chams_color(color)
+        for _, part in next, hitpart:GetChildren() do
+            part.BackgroundColor3 = color
+        end
+    end
+
+    function cfg.set_text_color(color)
+        player_name.TextColor3 = color
+        weapon.TextColor3 = color
+        distance.TextColor3 = color
+    end
 	function cfg.preview_chams(bool)
 		for _, glow in next, glow_patterns do
 			glow.Visible = bool
@@ -1186,7 +1219,27 @@ function library:window(properties)
 		TextSize = 12,
 		Size = UDim2.new(1, 0, 0, 4),
 	})
-
+local distance = library:create("TextLabel", {
+        Parent = bottom_holder,
+        Name = "Distance",
+        FontFace = library.font,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        Text = "100m",
+        TextStrokeTransparency = 0,
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        BackgroundTransparency = 1,
+        AutomaticSize = Enum.AutomaticSize.Y,
+        ZIndex = 50,
+        TextSize = 12,
+        Size = UDim2.new(1, 0, 0, 4),
+        Visible = false, -- Hidden by default
+    })
+    
+    library:create("UIStroke", {
+        Parent = distance,
+        Name = "",
+        LineJoinMode = Enum.LineJoinMode.Miter,
+    })
 	function cfg.preview_weapon(bool)
 		weapon.Visible = bool
 	end
