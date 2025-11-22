@@ -934,312 +934,7 @@ function library:window(properties)
 
 		table.insert(glow_patterns, glow)
 	end
--- [FIX] Hide unwanted elements by default
-    armor.Visible = false
-    image_holder.Visible = false
 
-    -- [FIX] New Color & Toggle Functions
-    function cfg.preview_distance(bool)
-        distance.Visible = bool
-    end
-
-    function cfg.set_box_color(color)
-        box_color.Color = color
-        BoxLine2.Color = color -- Update outline if needed
-        for _, v in next, corner_box:GetChildren() do
-            if v:IsA("Frame") then v.BorderColor3 = color end
-        end
-    end
-
-    function cfg.set_fill_color(color)
-        -- Update gradient keys for filler
-        local old_transparency = gradient.Transparency
-        gradient.Color = ColorSequence.new(color)
-    end
-
-    function cfg.set_chams_color(color)
-        for _, part in next, hitpart:GetChildren() do
-            part.BackgroundColor3 = color
-        end
-    end
-
-    function cfg.set_text_color(color)
-        player_name.TextColor3 = color
-        weapon.TextColor3 = color
-        distance.TextColor3 = color
-    end
-	function cfg.preview_chams(bool)
-		for _, glow in next, glow_patterns do
-			glow.Visible = bool
-		end
-
-		for _, part in next, hitpart:GetChildren() do
-			part.BackgroundColor3 = bool and themes.preset.accent or Color3.fromRGB(38, 38, 38)
-		end
-	end
-
-	local player = library:create("Frame", {
-		Parent = tabs,
-		Name = "",
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 43, 0, 28),
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		Size = UDim2.new(1, -86, 1, -106),
-		BorderSizePixel = 0,
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local line_holder = library:create("Frame", {
-		Parent = player,
-		Name = "",
-		Size = UDim2.new(1, 0, 1, 0),
-		ZIndex = 50,
-		BorderSizePixel = 0,
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local box_outline = library:create("Frame", {
-		Parent = line_holder,
-		Name = "",
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0, -1, 0, -1),
-		ZIndex = 50,
-		Size = UDim2.new(1, 2, 1, 2),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local BoxLine2 = library:create("UIStroke", {
-		Parent = box_outline,
-		Name = "",
-		LineJoinMode = Enum.LineJoinMode.Miter,
-	})
-
-	local box_color = library:create("UIStroke", {
-		Parent = line_holder,
-		Name = "",
-		Color = Color3.fromRGB(255, 255, 255),
-		LineJoinMode = Enum.LineJoinMode.Miter,
-	})
-
-	local corner_box = library:create("Frame", {
-		Parent = line_holder,
-		Name = "",
-		Visible = false,
-		BackgroundTransparency = 1,
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		Size = UDim2.new(1, 0, 1, 0),
-		BorderSizePixel = 0,
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local top_left = library:create("Frame", {
-		Parent = corner_box,
-		Name = "",
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		ZIndex = 50,
-		Size = UDim2.new(0, 1, 0.30000001192092896, 0),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local top_right = library:create("Frame", {
-		Parent = corner_box,
-		Name = "",
-		AnchorPoint = Vector2.new(1, 0),
-		Position = UDim2.new(1, -1, 0, 0),
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		ZIndex = 50,
-		Size = UDim2.new(0, 1, 0.30000001192092896, 0),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local bottom_left = library:create("Frame", {
-		Parent = corner_box,
-		Name = "",
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 0, 1, 0),
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		ZIndex = 50,
-		Size = UDim2.new(0.4000000059604645, 0, 0, 1),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local bottom_right = library:create("Frame", {
-		Parent = corner_box,
-		Name = "",
-		AnchorPoint = Vector2.new(1, 1),
-		Position = UDim2.new(1, -1, 1, 0),
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		ZIndex = 50,
-		Size = UDim2.new(0.4000000059604645, 0, 0, 1),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local bottom_left2 = library:create("Frame", {
-		Parent = corner_box,
-		Name = "",
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 0, 1, 0),
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		ZIndex = 50,
-		Size = UDim2.new(0, 1, 0.30000001192092896, 0),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local bottom_right2 = library:create("Frame", {
-		Parent = corner_box,
-		Name = "",
-		AnchorPoint = Vector2.new(1, 1),
-		Position = UDim2.new(1, 0, 1, 0),
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		ZIndex = 50,
-		Size = UDim2.new(0, 1, 0.30000001192092896, 0),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local top_left2 = library:create("Frame", {
-		Parent = corner_box,
-		Name = "",
-		AnchorPoint = Vector2.new(0, 1),
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		ZIndex = 50,
-		Size = UDim2.new(0.4000000059604645, 0, 0, 1),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local top_right2 = library:create("Frame", {
-		Parent = corner_box,
-		Name = "",
-		AnchorPoint = Vector2.new(1, 1),
-		Position = UDim2.new(1, -1, 0, 0),
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		ZIndex = 50,
-		Size = UDim2.new(0.4000000059604645, 0, 0, 1),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	function cfg.preview_corner_boxes(bool)
-		corner_box.Visible = bool == "Corner" and true or false
-		BoxLine2.Enabled = bool == "Corner" and false or true
-		box_outline.Visible = bool == "Corner" and false or true
-		box_color.Enabled = bool == "Corner" and false or true
-	end
-
-	function cfg.preview_bounding_box(bool)
-		BoxLine2.Enabled = bool
-		box_outline.Visible = bool
-		box_color.Enabled = bool
-	end
-
-	local bottom_holder = library:create("Frame", {
-		Parent = line_holder,
-		Name = "",
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0, -1, 1, 3),
-		Size = UDim2.new(1, 2, 0, 0),
-		BorderSizePixel = 0,
-		AutomaticSize = Enum.AutomaticSize.Y,
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local UIListLayout = library:create("UIListLayout", {
-		Parent = bottom_holder,
-		Name = "",
-		Padding = UDim.new(0, 2),
-		SortOrder = Enum.SortOrder.LayoutOrder,
-	})
-
-	local UIPadding = library:create("UIPadding", {
-		Parent = bottom_holder,
-		Name = "",
-		PaddingTop = UDim.new(0, 1),
-	})
-
-	local bar_holder = library:create("Frame", {
-		Parent = bottom_holder,
-		Name = "",
-		BackgroundTransparency = 1,
-		Size = UDim2.new(1, 0, 0, 4),
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		BorderSizePixel = 0,
-		AutomaticSize = Enum.AutomaticSize.Y,
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-	})
-
-	local reload_bar = library:create("Frame", {
-		Parent = bar_holder,
-		Name = "",
-		Size = UDim2.new(1, 0, 0, 4),
-		ZIndex = 50,
-		BorderSizePixel = 0,
-		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-	})
-
-	function cfg.preview_reload_bar(bool)
-		bar_holder.Visible = bool
-	end
-
-	local reload_slider = library:create("Frame", {
-		Parent = reload_bar,
-		Name = "",
-		Size = UDim2.new(0.5, -2, 0, 2),
-		Position = UDim2.new(0, 1, 0, 1),
-		ZIndex = 50,
-		BorderSizePixel = 0,
-		BackgroundColor3 = Color3.fromRGB(28, 145, 255),
-	})
-
-	local gradient = library:create("UIGradient", {
-		Parent = reload_slider,
-		Name = "",
-		Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 238)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 238)),
-		}),
-	})
-
-	local UIStroke = library:create("UIStroke", {
-		Parent = distance,
-		Name = "",
-		LineJoinMode = Enum.LineJoinMode.Miter,
-	})
-
-	local weapon = library:create("TextLabel", {
-		Parent = bottom_holder,
-		Name = "",
-		FontFace = library.font,
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		Text = "double barrel",
-		TextStrokeTransparency = 0,
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0.5, 0, 0.031031031161546707, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		ZIndex = 50,
-		TextSize = 12,
-		Size = UDim2.new(1, 0, 0, 4),
-	})
-local distance = library:create("TextLabel", {
-        Parent = bottom_holder,
-        Name = "Distance",
-        FontFace = library.font,
-        TextColor3 = Color3.fromRGB(255, 255, 255),
-        Text = "100m",
-        TextStrokeTransparency = 0,
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        BackgroundTransparency = 1,
-        AutomaticSize = Enum.AutomaticSize.Y,
-        ZIndex = 50,
-        TextSize = 12,
-        Size = UDim2.new(1, 0, 0, 4),
-        Visible = false, -- Hidden by default
-    })
-    
-    library:create("UIStroke", {
-        Parent = distance,
-        Name = "",
-        LineJoinMode = Enum.LineJoinMode.Miter,
-    })
 	function cfg.preview_weapon(bool)
 		weapon.Visible = bool
 	end
@@ -2300,6 +1995,617 @@ local distance = library:create("TextLabel", {
 function cfg.toggle_preview(state)
         esp_preview.Visible = state
     end
+	-- [FIX] Hide unwanted elements by default
+    armor.Visible = false
+    image_holder.Visible = false
+
+    -- [FIX] New Color & Toggle Functions
+    function cfg.preview_distance(bool)
+        distance.Visible = bool
+    end
+
+    function cfg.set_box_color(color)
+        box_color.Color = color
+        BoxLine2.Color = color -- Update outline if needed
+        for _, v in next, corner_box:GetChildren() do
+            if v:IsA("Frame") then v.BorderColor3 = color end
+        end
+    end
+
+    function cfg.set_fill_color(color)
+        -- Update gradient keys for filler
+        local old_transparency = gradient.Transparency
+        gradient.Color = ColorSequence.new(color)
+    end
+
+    function cfg.set_chams_color(color)
+        for _, part in next, hitpart:GetChildren() do
+            part.BackgroundColor3 = color
+        end
+    end
+
+    function cfg.set_text_color(color)
+        player_name.TextColor3 = color
+        weapon.TextColor3 = color
+        distance.TextColor3 = color
+    end
+	function cfg.preview_chams(bool)
+		for _, glow in next, glow_patterns do
+			glow.Visible = bool
+		end
+
+		for _, part in next, hitpart:GetChildren() do
+			part.BackgroundColor3 = bool and themes.preset.accent or Color3.fromRGB(38, 38, 38)
+		end
+	end
+
+	local player = library:create("Frame", {
+		Parent = tabs,
+		Name = "",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 43, 0, 28),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		Size = UDim2.new(1, -86, 1, -106),
+		BorderSizePixel = 0,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local line_holder = library:create("Frame", {
+		Parent = player,
+		Name = "",
+		Size = UDim2.new(1, 0, 1, 0),
+		ZIndex = 50,
+		BorderSizePixel = 0,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local box_outline = library:create("Frame", {
+		Parent = line_holder,
+		Name = "",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, -1, 0, -1),
+		ZIndex = 50,
+		Size = UDim2.new(1, 2, 1, 2),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local BoxLine2 = library:create("UIStroke", {
+		Parent = box_outline,
+		Name = "",
+		LineJoinMode = Enum.LineJoinMode.Miter,
+	})
+
+	local box_color = library:create("UIStroke", {
+		Parent = line_holder,
+		Name = "",
+		Color = Color3.fromRGB(255, 255, 255),
+		LineJoinMode = Enum.LineJoinMode.Miter,
+	})
+
+	local corner_box = library:create("Frame", {
+		Parent = line_holder,
+		Name = "",
+		Visible = false,
+		BackgroundTransparency = 1,
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		Size = UDim2.new(1, 0, 1, 0),
+		BorderSizePixel = 0,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local top_left = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0, 1, 0.30000001192092896, 0),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local top_right = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -1, 0, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0, 1, 0.30000001192092896, 0),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local bottom_left = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.new(0, 0, 1, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0.4000000059604645, 0, 0, 1),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local bottom_right = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, -1, 1, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0.4000000059604645, 0, 0, 1),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local bottom_left2 = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.new(0, 0, 1, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0, 1, 0.30000001192092896, 0),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local bottom_right2 = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, 0, 1, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0, 1, 0.30000001192092896, 0),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local top_left2 = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(0, 1),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0.4000000059604645, 0, 0, 1),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local top_right2 = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, -1, 0, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0.4000000059604645, 0, 0, 1),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	function cfg.preview_corner_boxes(bool)
+		corner_box.Visible = bool == "Corner" and true or false
+		BoxLine2.Enabled = bool == "Corner" and false or true
+		box_outline.Visible = bool == "Corner" and false or true
+		box_color.Enabled = bool == "Corner" and false or true
+	end
+
+	function cfg.preview_bounding_box(bool)
+		BoxLine2.Enabled = bool
+		box_outline.Visible = bool
+		box_color.Enabled = bool
+	end
+
+	local bottom_holder = library:create("Frame", {
+		Parent = line_holder,
+		Name = "",
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, -1, 1, 3),
+		Size = UDim2.new(1, 2, 0, 0),
+		BorderSizePixel = 0,
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local UIListLayout = library:create("UIListLayout", {
+		Parent = bottom_holder,
+		Name = "",
+		Padding = UDim.new(0, 2),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+	})
+
+	local UIPadding = library:create("UIPadding", {
+		Parent = bottom_holder,
+		Name = "",
+		PaddingTop = UDim.new(0, 1),
+	})
+
+	local bar_holder = library:create("Frame", {
+		Parent = bottom_holder,
+		Name = "",
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 0, 0, 4),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		BorderSizePixel = 0,
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local reload_bar = library:create("Frame", {
+		Parent = bar_holder,
+		Name = "",
+		Size = UDim2.new(1, 0, 0, 4),
+		ZIndex = 50,
+		BorderSizePixel = 0,
+		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+	})
+
+	function cfg.preview_reload_bar(bool)
+		bar_holder.Visible = bool
+	end
+
+	local reload_slider = library:create("Frame", {
+		Parent = reload_bar,
+		Name = "",
+		Size = UDim2.new(0.5, -2, 0, 2),
+		Position = UDim2.new(0, 1, 0, 1),
+		ZIndex = 50,
+		BorderSizePixel = 0,
+		BackgroundColor3 = Color3.fromRGB(28, 145, 255),
+	})
+
+	local gradient = library:create("UIGradient", {
+		Parent = reload_slider,
+		Name = "",
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 238)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 238)),
+		}),
+	})
+
+	local UIStroke = library:create("UIStroke", {
+		Parent = distance,
+		Name = "",
+		LineJoinMode = Enum.LineJoinMode.Miter,
+	})
+
+	local weapon = library:create("TextLabel", {
+		Parent = bottom_holder,
+		Name = "",
+		FontFace = library.font,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		Text = "double barrel",
+		TextStrokeTransparency = 0,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0.5, 0, 0.031031031161546707, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		ZIndex = 50,
+		TextSize = 12,
+		Size = UDim2.new(1, 0, 0, 4),
+	})
+local distance = library:create("TextLabel", {
+        Parent = bottom_holder,
+        Name = "Distance",
+        FontFace = library.font,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        Text = "100m",
+        TextStrokeTransparency = 0,
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        BackgroundTransparency = 1,
+        AutomaticSize = Enum.AutomaticSize.Y,
+        ZIndex = 50,
+        TextSize = 12,
+        Size = UDim2.new(1, 0, 0, 4),
+        Visible = false, -- Hidden by default
+    })
+    
+    library:create("UIStroke", {
+        Parent = distance,
+        Name = "",
+        LineJoinMode = Enum.LineJoinMode.Miter,
+    })-- [FIX] Hide unwanted elements by default
+    armor.Visible = false
+    image_holder.Visible = false
+
+    -- [FIX] New Color & Toggle Functions
+    function cfg.preview_distance(bool)
+        distance.Visible = bool
+    end
+
+    function cfg.set_box_color(color)
+        box_color.Color = color
+        BoxLine2.Color = color -- Update outline if needed
+        for _, v in next, corner_box:GetChildren() do
+            if v:IsA("Frame") then v.BorderColor3 = color end
+        end
+    end
+
+    function cfg.set_fill_color(color)
+        -- Update gradient keys for filler
+        local old_transparency = gradient.Transparency
+        gradient.Color = ColorSequence.new(color)
+    end
+
+    function cfg.set_chams_color(color)
+        for _, part in next, hitpart:GetChildren() do
+            part.BackgroundColor3 = color
+        end
+    end
+
+    function cfg.set_text_color(color)
+        player_name.TextColor3 = color
+        weapon.TextColor3 = color
+        distance.TextColor3 = color
+    end
+	function cfg.preview_chams(bool)
+		for _, glow in next, glow_patterns do
+			glow.Visible = bool
+		end
+
+		for _, part in next, hitpart:GetChildren() do
+			part.BackgroundColor3 = bool and themes.preset.accent or Color3.fromRGB(38, 38, 38)
+		end
+	end
+
+	local player = library:create("Frame", {
+		Parent = tabs,
+		Name = "",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 43, 0, 28),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		Size = UDim2.new(1, -86, 1, -106),
+		BorderSizePixel = 0,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local line_holder = library:create("Frame", {
+		Parent = player,
+		Name = "",
+		Size = UDim2.new(1, 0, 1, 0),
+		ZIndex = 50,
+		BorderSizePixel = 0,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local box_outline = library:create("Frame", {
+		Parent = line_holder,
+		Name = "",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, -1, 0, -1),
+		ZIndex = 50,
+		Size = UDim2.new(1, 2, 1, 2),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local BoxLine2 = library:create("UIStroke", {
+		Parent = box_outline,
+		Name = "",
+		LineJoinMode = Enum.LineJoinMode.Miter,
+	})
+
+	local box_color = library:create("UIStroke", {
+		Parent = line_holder,
+		Name = "",
+		Color = Color3.fromRGB(255, 255, 255),
+		LineJoinMode = Enum.LineJoinMode.Miter,
+	})
+
+	local corner_box = library:create("Frame", {
+		Parent = line_holder,
+		Name = "",
+		Visible = false,
+		BackgroundTransparency = 1,
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		Size = UDim2.new(1, 0, 1, 0),
+		BorderSizePixel = 0,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local top_left = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0, 1, 0.30000001192092896, 0),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local top_right = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -1, 0, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0, 1, 0.30000001192092896, 0),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local bottom_left = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.new(0, 0, 1, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0.4000000059604645, 0, 0, 1),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local bottom_right = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, -1, 1, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0.4000000059604645, 0, 0, 1),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local bottom_left2 = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.new(0, 0, 1, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0, 1, 0.30000001192092896, 0),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local bottom_right2 = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, 0, 1, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0, 1, 0.30000001192092896, 0),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local top_left2 = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(0, 1),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0.4000000059604645, 0, 0, 1),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local top_right2 = library:create("Frame", {
+		Parent = corner_box,
+		Name = "",
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, -1, 0, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		ZIndex = 50,
+		Size = UDim2.new(0.4000000059604645, 0, 0, 1),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	function cfg.preview_corner_boxes(bool)
+		corner_box.Visible = bool == "Corner" and true or false
+		BoxLine2.Enabled = bool == "Corner" and false or true
+		box_outline.Visible = bool == "Corner" and false or true
+		box_color.Enabled = bool == "Corner" and false or true
+	end
+
+	function cfg.preview_bounding_box(bool)
+		BoxLine2.Enabled = bool
+		box_outline.Visible = bool
+		box_color.Enabled = bool
+	end
+
+	local bottom_holder = library:create("Frame", {
+		Parent = line_holder,
+		Name = "",
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, -1, 1, 3),
+		Size = UDim2.new(1, 2, 0, 0),
+		BorderSizePixel = 0,
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local UIListLayout = library:create("UIListLayout", {
+		Parent = bottom_holder,
+		Name = "",
+		Padding = UDim.new(0, 2),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+	})
+
+	local UIPadding = library:create("UIPadding", {
+		Parent = bottom_holder,
+		Name = "",
+		PaddingTop = UDim.new(0, 1),
+	})
+
+	local bar_holder = library:create("Frame", {
+		Parent = bottom_holder,
+		Name = "",
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 0, 0, 4),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		BorderSizePixel = 0,
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	})
+
+	local reload_bar = library:create("Frame", {
+		Parent = bar_holder,
+		Name = "",
+		Size = UDim2.new(1, 0, 0, 4),
+		ZIndex = 50,
+		BorderSizePixel = 0,
+		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+	})
+
+	function cfg.preview_reload_bar(bool)
+		bar_holder.Visible = bool
+	end
+
+	local reload_slider = library:create("Frame", {
+		Parent = reload_bar,
+		Name = "",
+		Size = UDim2.new(0.5, -2, 0, 2),
+		Position = UDim2.new(0, 1, 0, 1),
+		ZIndex = 50,
+		BorderSizePixel = 0,
+		BackgroundColor3 = Color3.fromRGB(28, 145, 255),
+	})
+
+	local gradient = library:create("UIGradient", {
+		Parent = reload_slider,
+		Name = "",
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 238)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 238)),
+		}),
+	})
+
+	local UIStroke = library:create("UIStroke", {
+		Parent = distance,
+		Name = "",
+		LineJoinMode = Enum.LineJoinMode.Miter,
+	})
+
+	local weapon = library:create("TextLabel", {
+		Parent = bottom_holder,
+		Name = "",
+		FontFace = library.font,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		Text = "double barrel",
+		TextStrokeTransparency = 0,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0.5, 0, 0.031031031161546707, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		ZIndex = 50,
+		TextSize = 12,
+		Size = UDim2.new(1, 0, 0, 4),
+	})
+local distance = library:create("TextLabel", {
+        Parent = bottom_holder,
+        Name = "Distance",
+        FontFace = library.font,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        Text = "100m",
+        TextStrokeTransparency = 0,
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        BackgroundTransparency = 1,
+        AutomaticSize = Enum.AutomaticSize.Y,
+        ZIndex = 50,
+        TextSize = 12,
+        Size = UDim2.new(1, 0, 0, 4),
+        Visible = false, -- Hidden by default
+    })
+    
+    library:create("UIStroke", {
+        Parent = distance,
+        Name = "",
+        LineJoinMode = Enum.LineJoinMode.Miter,
+    })
 	return setmetatable(cfg, library)
 end
 
