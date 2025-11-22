@@ -328,19 +328,27 @@ function library:convert_enum(enum)
 end
 
 function library:config_list_update()
-	if not library.config_holder then
-		return
-	end
+    if not library.config_holder then
+        return
+    end
 
-	local list = {}
+    local list = {}
 
-	for idx, file in next, listfiles(library.directory .. "/configs") do
-		local name = file.split(file, "/configs/")[2]
-		name = name.split(name, ".cfg")[1]
-		list[#list + 1] = name
-	end
+    for idx, file in next, listfiles(library.directory .. "/configs") do
+        -- ROBUST FIX:
+        -- 1. Remove the folder path (handle both / and \ slashes)
+        local name = file:gsub(".+[/\\]", "")
+        
+        -- 2. Remove the .cfg extension
+        name = name:gsub("%.cfg$", "")
+        
+        -- 3. Add to list if name exists
+        if name and name ~= "" then
+            list[#list + 1] = name
+        end
+    end
 
-	library.config_holder:refresh_options(list)
+    library.config_holder:refresh_options(list)
 end
 
 function library:get_config()
