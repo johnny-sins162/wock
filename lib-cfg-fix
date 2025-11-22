@@ -1335,6 +1335,13 @@ function library:window(properties)
 		BorderSizePixel = 0,
 		BackgroundColor3 = Color3.fromRGB(0, 255, 42),
 	})
+	-- [FIX] Add Gradient to Health Bar
+    local health_gradient = library:create("UIGradient", {
+        Parent = health_slider,
+        Name = "Gradient",
+        Enabled = false,
+        Rotation = 0 -- Vertical gradient
+    })
 
 	local health_text = library:create("TextLabel", {
 		Parent = health_slider,
@@ -2266,16 +2273,23 @@ function cfg.preview_filler(bool)
 	end
 
 	function cfg.set_menu_visibility(bool, pl)
-		WINDOW_PATH.Visible = bool
+        WINDOW_PATH.Visible = bool
+        
+        -- [FIX] Hide ESP Preview when menu closes
+        if not bool then
+            esp_preview.Visible = false
+        else
+            -- Restore preview if it was enabled in settings
+            if library.flags["esp_preview_visible"] then
+                esp_preview.Visible = true
+            end
+        end
 
-		playerlist.Visible = flags["player_list"] and bool or false
-	end
-function cfg.toggle_preview(state)
-        esp_preview.Visible = state
+        playerlist.Visible = flags["player_list"] and bool or false
     end
-	-- // [FIXED] LINKING FUNCTIONS (Paste inside library:window) // --
+-- // [FIXED] FINAL LINKING FUNCTIONS // --
 
-    -- 1. Text Casing Helper (Internal)
+    -- 1. Text Casing Helper
     local current_font_state = { size = 12, face = library.font, casing = "Lower case" }
     
     local function ApplyCasing(text, mode)
@@ -2284,11 +2298,10 @@ function cfg.toggle_preview(state)
         elseif mode == "lower case" then return text:lower()
         elseif mode == "Sentence case" then return text:sub(1,1):upper()..text:sub(2):lower()
         elseif mode == "Pascal Case" then return text:gsub("(%a)([%w]*)", function(a,b) return a:upper()..b:lower() end)
-        else return text end -- None
+        else return text end
     end
 
     local function UpdateAllText()
-        -- Original strings to re-format
         local raw_name = "player"
         local raw_weapon = "double barrel"
         local raw_dist = "100m"
@@ -2310,7 +2323,6 @@ function cfg.toggle_preview(state)
         end
     end
 
-    -- 2. Public Setter Functions
     function cfg.set_font_data(type, value)
         if type == "size" then current_font_state.size = value end
         if type == "face" then current_font_state.face = value end
@@ -2318,9 +2330,8 @@ function cfg.toggle_preview(state)
         UpdateAllText()
     end
 
-    function cfg.preview_distance(bool)
-        if distance then distance.Visible = bool end
-    end
+    -- 2. Visibility & Colors
+    function cfg.preview_distance(bool) if distance then distance.Visible = bool end end
 
     function cfg.set_box_color(color)
         if box_color then box_color.Color = color end
@@ -2334,25 +2345,43 @@ function cfg.toggle_preview(state)
 
     function cfg.set_fill_color(color)
         if gradient then 
-            gradient.Color = ColorSequence.new{
-                ColorSequenceKeypoint.new(0, color),
-                ColorSequenceKeypoint.new(1, color)
-            }
+            gradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, color), ColorSequenceKeypoint.new(1, color)}
         end
     end
+
+    -- [FIX] Split Text Colors
+    function cfg.set_name_color(color) if player_name then player_name.TextColor3 = color end end
+    function cfg.set_weapon_color(color) if weapon then weapon.TextColor3 = color end end
+    function cfg.set_dist_color(color) if distance then distance.TextColor3 = color end end
 
     function cfg.set_chams_color(color)
         if hitpart then
-            for _, part in next, hitpart:GetChildren() do
-                part.BackgroundColor3 = color
-            end
+            for _, part in next, hitpart:GetChildren() do part.BackgroundColor3 = color end
         end
     end
 
-    function cfg.set_text_color(color)
-        if player_name then player_name.TextColor3 = color end
-        if weapon then weapon.TextColor3 = color end
-        if distance then distance.TextColor3 = color end
+    -- [FIX] Health Bar Functions
+    function cfg.set_health_width(val)
+        -- 'health' is the container frame. We adjust its width.
+        if health then health.Size = UDim2.new(0, val, 1, 4) end
+        -- Reposition 'armor' if needed so they don't overlap (optional polish)
+        if armor then armor.Position = UDim2.new(0, -8 - val, 0, -2) end
+    end
+
+    function cfg.set_health_gradient(enabled, c1, c2, c3)
+        if not health_gradient then return end
+        health_gradient.Enabled = enabled
+        if enabled then
+            -- Create a vertical gradient (Green -> Yellow -> Red)
+            health_gradient.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, c1), -- High (Green)
+                ColorSequenceKeypoint.new(0.5, c2), -- Mid (Yellow)
+                ColorSequenceKeypoint.new(1, c3)  -- Low (Red)
+            }
+        else
+            -- Reset to solid green if disabled (or whatever the high color is)
+            if health_slider then health_slider.BackgroundColor3 = c1 end
+        end
     end
 	return setmetatable(cfg, library)
 end
