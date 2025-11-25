@@ -10,19 +10,29 @@ if not twinkhook then
 
     function twinkhook.http_get(path)
         return game:HttpGet('https://github.com/mintylegacy/hook/blob/main/'..path);
-    end
+    end;
 end
 
 -- services
-local coreGui = gethui and gethui() or game:GetService("CoreGui")
+local coreGui = gethui();
 
 -- objects
 local camera = workspace.CurrentCamera
 local drawingUI = Instance.new("ScreenGui")
 drawingUI.Name = "Drawing3"
-drawingUI.IgnoreGuiInset = true -- [Improvement #4] Ensures drawing covers topbar
-drawingUI.DisplayOrder = 2147483647 -- [Improvement #4] Max ZIndex
+drawingUI.IgnoreGuiInset = true
+drawingUI.ZIndexBehavior = Enum.ZIndexBehavior.Global -- [Fix] Prevents Box drawing over Text
+drawingUI.DisplayOrder = 0x7fffffff
 drawingUI.Parent = coreGui
+
+-- [Optimization] Localize Math for Speed
+local math_floor = math.floor
+local math_atan2 = math.atan2
+local math_deg = math.deg
+local math_clamp = math.clamp
+local UDim2_fromOffset = UDim2.fromOffset
+local Vector2_zero = Vector2.zero
+local Vector2_one = Vector2.one
 
 -- variables
 local drawingIndex = 0
@@ -30,7 +40,7 @@ local baseDrawingObj = setmetatable({
     Visible = true,
     ZIndex = 0,
     Transparency = 1,
-    Color = Color3.new(),
+    Color = Color3.new(), -- [Fix] Restored to Black (0,0,0) to fix White Healthbar
     Remove = function(self)
         setmetatable(self, nil)
     end;
@@ -49,6 +59,7 @@ local baseDrawingObj = setmetatable({
     end
 });
 
+-- [Restored] Original Font Loading Logic
 local Fonts = loadstring(twinkhook.http_get('modules/fonts.lua?raw=true'))('twinkhook');
 
 local drawingFontsEnum = {
@@ -59,21 +70,13 @@ local drawingFontsEnum = {
     [4] = Fonts.Append('minecraftia', twinkhook.http_get('fonts/Minecraftia.txt?raw=true')),
 }
 
--- function
 local function getFontFromIndex(fontIndex)
     return drawingFontsEnum[fontIndex]
 end
 
 local function convertTransparency(transparency)
-    return math.clamp(1 - transparency, 0, 1)
+    return math_clamp(1 - transparency, 0, 1)
 end
-
--- [Improvement #3] Localize Math for Speed
-local deg, atan2 = math.deg, math.atan2
-local Vector2zero = Vector2.zero
-local Vector2one = Vector2.one
-local UDim2new = UDim2.new
-local UDim2fromOffset = UDim2.fromOffset -- Faster access
 
 -- main
 local DrawingLib = {}
@@ -89,28 +92,30 @@ function DrawingLib.new(drawingType)
     drawingIndex += 1
     if drawingType == "Line" then
         local lineObj = ({
-            From = Vector2zero,
-            To = Vector2zero,
+            From = Vector2_zero,
+            To = Vector2_zero,
             Thickness = 1
         } + baseDrawingObj)
 
         local lineFrame = Instance.new("Frame")
         lineFrame.Name = drawingIndex
-        lineFrame.AnchorPoint = (Vector2one * .5)
+        lineFrame.AnchorPoint = (Vector2_one * .5)
         lineFrame.BorderSizePixel = 0
+
         lineFrame.BackgroundColor3 = lineObj.Color
-        lineFrame.Visible = lineObj.Visible
+        lineFrame.Visible = false -- [Fix] Hidden default to prevent ghosts
         lineFrame.ZIndex = lineObj.ZIndex
         lineFrame.BackgroundTransparency = convertTransparency(lineObj.Transparency)
-        lineFrame.Size = UDim2new()
-        lineFrame.Parent = drawingUI
 
+        lineFrame.Size = UDim2.new()
+
+        lineFrame.Parent = drawingUI
         return setmetatable({ Object = lineFrame }, {
             __newindex = function(_, index, value)
                 if typeof(lineObj[index]) == "nil" then return end
                 lineObj[index] = value
 
-                -- [Improvement #3] Consolidated Line Math
+                -- [Optimization] Consolidated Math
                 if index == "From" or index == "To" or index == "Thickness" then
                     local from = lineObj.From
                     local to = lineObj.To
@@ -118,11 +123,12 @@ function DrawingLib.new(drawingType)
                     local center = (from + to) / 2
                     local diff = to - from
                     local distance = diff.Magnitude
-                    local theta = deg(atan2(diff.Y, diff.X))
+                    local theta = math_deg(math_atan2(diff.Y, diff.X))
 
-                    lineFrame.Position = UDim2fromOffset(center.X, center.Y)
+                    lineFrame.Position = UDim2_fromOffset(center.X, center.Y)
                     lineFrame.Rotation = theta
-                    lineFrame.Size = UDim2fromOffset(distance, lineObj.Thickness)
+                    lineFrame.Size = UDim2_fromOffset(distance, lineObj.Thickness)
+                
                 elseif index == "Visible" then
                     lineFrame.Visible = value
                 elseif index == "ZIndex" then
@@ -149,7 +155,7 @@ function DrawingLib.new(drawingType)
             Text = "",
             Font = DrawingLib.Fonts.Tahoma,
             Size = 0,
-            Position = Vector2zero,
+            Position = Vector2_zero,
             Center = false,
             Outline = false,
             OutlineColor = Color3.new()
@@ -157,43 +163,46 @@ function DrawingLib.new(drawingType)
 
         local textLabel, textStroke = Instance.new("TextLabel"), Instance.new('UIStroke');
         textLabel.Name = drawingIndex
-        textLabel.AnchorPoint = (Vector2one * .5)
+        textLabel.AnchorPoint = (Vector2_one * .5)
         textLabel.BorderSizePixel = 0
         textLabel.BackgroundTransparency = 1
         textLabel.RichText = true
-        textLabel.Visible = textObj.Visible
+
+        textLabel.Visible = false -- [Fix] Hidden default
         textLabel.TextColor3 = textObj.Color
         textLabel.TextTransparency = convertTransparency(textObj.Transparency)
         textLabel.ZIndex = textObj.ZIndex;
         textLabel.FontFace = getFontFromIndex(textObj.Font)
         textLabel.TextSize = textObj.Size;
+
         textStroke.Parent = textLabel;
         textLabel.TextXAlignment = Enum.TextXAlignment.Left;
         textLabel.Parent = drawingUI
 
-        -- [Improvement #5] Manual Update Function (No Signals)
+        -- [Optimization] Function to update layout only when needed
+        -- Replaces the laggy GetPropertyChangedSignal("TextBounds")
         local function updateTextLayout()
             local textBounds = textLabel.TextBounds
             local offset = textBounds / 2
-            textLabel.Size = UDim2fromOffset(textBounds.X, textBounds.Y)
+            textLabel.Size = UDim2_fromOffset(textBounds.X, textBounds.Y)
             
             if textObj.Center then
-                textLabel.Position = UDim2fromOffset(textObj.Position.X, textObj.Position.Y) -- Anchor point handles centering
+                textLabel.Position = UDim2_fromOffset(textObj.Position.X, textObj.Position.Y)
             else
-                textLabel.Position = UDim2fromOffset(textObj.Position.X + offset.X, textObj.Position.Y + offset.Y)
+                textLabel.Position = UDim2_fromOffset(textObj.Position.X + offset.X, textObj.Position.Y + offset.Y)
             end
         end
 
         return setmetatable({ Object = textLabel }, {
             __newindex = function(_, index, value)
                 if typeof(textObj[index]) == "nil" then return end
-                textObj[index] = value -- Update internal value first
+                textObj[index] = value
 
                 if index == "Text" then
                     textLabel.Text = value
-                    updateTextLayout() -- [Improvement #5] Update only on change
+                    updateTextLayout()
                 elseif index == "Font" then
-                    value = math.clamp(value, 0, 4)
+                    value = math_clamp(value, 0, 5)
                     textLabel.FontFace = getFontFromIndex(value)
                     updateTextLayout()
                 elseif index == "Size" then
@@ -235,22 +244,23 @@ function DrawingLib.new(drawingType)
     elseif drawingType == "Circle" then
         local circleObj = ({
             Radius = 150,
-            Position = Vector2zero,
+            Position = Vector2_zero,
             Thickness = .7,
             Filled = false
         } + baseDrawingObj)
 
         local circleFrame, uiCorner, uiStroke = Instance.new("Frame"), Instance.new("UICorner"), Instance.new("UIStroke")
         circleFrame.Name = drawingIndex
-        circleFrame.AnchorPoint = (Vector2one * .5)
+        circleFrame.AnchorPoint = (Vector2_one * .5)
         circleFrame.BorderSizePixel = 0
+
         circleFrame.BackgroundTransparency = (if circleObj.Filled then convertTransparency(circleObj.Transparency) else 1)
         circleFrame.BackgroundColor3 = circleObj.Color
-        circleFrame.Visible = circleObj.Visible
+        circleFrame.Visible = false -- [Fix] Hidden default
         circleFrame.ZIndex = circleObj.ZIndex
 
         uiCorner.CornerRadius = UDim.new(1, 0)
-        circleFrame.Size = UDim2fromOffset(circleObj.Radius, circleObj.Radius)
+        circleFrame.Size = UDim2_fromOffset(circleObj.Radius, circleObj.Radius)
 
         uiStroke.Thickness = circleObj.Thickness
         uiStroke.Enabled = not circleObj.Filled
@@ -264,11 +274,11 @@ function DrawingLib.new(drawingType)
 
                 if index == "Radius" then
                     local radius = value * 2
-                    circleFrame.Size = UDim2fromOffset(radius, radius)
+                    circleFrame.Size = UDim2_fromOffset(radius, radius)
                 elseif index == "Position" then
-                    circleFrame.Position = UDim2fromOffset(value.X, value.Y)
+                    circleFrame.Position = UDim2_fromOffset(value.X, value.Y)
                 elseif index == "Thickness" then
-                    value = math.clamp(value, .6, 0x7fffffff)
+                    value = math_clamp(value, .6, 0x7fffffff)
                     uiStroke.Thickness = value
                 elseif index == "Filled" then
                     circleFrame.BackgroundTransparency = (if value then convertTransparency(circleObj.Transparency) else 1)
@@ -299,8 +309,8 @@ function DrawingLib.new(drawingType)
         })
     elseif drawingType == "Square" then
         local squareObj = ({
-            Size = Vector2zero,
-            Position = Vector2zero,
+            Size = Vector2_zero,
+            Position = Vector2_zero,
             Thickness = .7,
             Filled = false
         } + baseDrawingObj)
@@ -308,10 +318,11 @@ function DrawingLib.new(drawingType)
         local squareFrame, uiStroke = Instance.new("Frame"), Instance.new("UIStroke")
         squareFrame.Name = drawingIndex
         squareFrame.BorderSizePixel = 0
+
         squareFrame.BackgroundTransparency = (if squareObj.Filled then convertTransparency(squareObj.Transparency) else 1)
         squareFrame.ZIndex = squareObj.ZIndex
         squareFrame.BackgroundColor3 = squareObj.Color
-        squareFrame.Visible = squareObj.Visible
+        squareFrame.Visible = false -- [Fix] Hidden default
 
         uiStroke.Thickness = squareObj.Thickness
         uiStroke.Enabled = not squareObj.Filled
@@ -324,11 +335,11 @@ function DrawingLib.new(drawingType)
                 squareObj[index] = value
 
                 if index == "Size" then
-                    squareFrame.Size = UDim2fromOffset(value.X, value.Y)
+                    squareFrame.Size = UDim2_fromOffset(value.X, value.Y)
                 elseif index == "Position" then
-                    squareFrame.Position = UDim2fromOffset(value.X, value.Y)
+                    squareFrame.Position = UDim2_fromOffset(value.X, value.Y)
                 elseif index == "Thickness" then
-                    value = math.clamp(value, 0.6, 0x7fffffff)
+                    value = math_clamp(value, 0.6, 0x7fffffff)
                     uiStroke.Thickness = value
                 elseif index == "Filled" then
                     squareFrame.BackgroundTransparency = (if value then convertTransparency(squareObj.Transparency) else 1)
@@ -361,8 +372,8 @@ function DrawingLib.new(drawingType)
         local imageObj = ({
             Data = "",
             DataURL = "rbxassetid://",
-            Size = Vector2zero,
-            Position = Vector2zero
+            Size = Vector2_zero,
+            Position = Vector2_zero
         } + baseDrawingObj)
 
         local imageFrame = Instance.new("ImageLabel")
@@ -370,12 +381,13 @@ function DrawingLib.new(drawingType)
         imageFrame.BorderSizePixel = 0
         imageFrame.ScaleType = Enum.ScaleType.Stretch
         imageFrame.BackgroundTransparency = 1
-        imageFrame.Visible = imageObj.Visible
+
+        imageFrame.Visible = false -- [Fix] Hidden default
         imageFrame.ZIndex = imageObj.ZIndex
         imageFrame.ImageTransparency = convertTransparency(imageObj.Transparency)
         imageFrame.ImageColor3 = imageObj.Color
-        imageFrame.Parent = drawingUI
 
+        imageFrame.Parent = drawingUI
         return setmetatable({ Object = imageFrame }, {
             __newindex = function(_, index, value)
                 if typeof(imageObj[index]) == "nil" then return end
@@ -383,12 +395,12 @@ function DrawingLib.new(drawingType)
 
                 if index == "Data" then
                     -- later
-                elseif index == "DataURL" then
+                elseif index == "DataURL" then -- temporary property
                     imageFrame.Image = value
                 elseif index == "Size" then
-                    imageFrame.Size = UDim2fromOffset(value.X, value.Y)
+                    imageFrame.Size = UDim2_fromOffset(value.X, value.Y)
                 elseif index == "Position" then
-                    imageFrame.Position = UDim2fromOffset(value.X, value.Y)
+                    imageFrame.Position = UDim2_fromOffset(value.X, value.Y)
                 elseif index == "Visible" then
                     imageFrame.Visible = value
                 elseif index == "ZIndex" then
@@ -414,10 +426,10 @@ function DrawingLib.new(drawingType)
         })
     elseif drawingType == "Quad" then
         local quadObj = ({
-            PointA = Vector2zero,
-            PointB = Vector2zero,
-            PointC = Vector2zero,
-            PointD = Vector2zero,
+            PointA = Vector2_zero,
+            PointB = Vector2_zero,
+            PointC = Vector2_zero,
+            PointD = Vector2_zero,
             Thickness = 1,
             Filled = false
         } + baseDrawingObj)
@@ -458,6 +470,7 @@ function DrawingLib.new(drawingType)
                         for _, linePoint in _linePoints do
                             linePoint:Remove()
                         end
+
                         quadObj.Remove(self)
                         return quadObj:Remove()
                     end
@@ -467,9 +480,9 @@ function DrawingLib.new(drawingType)
         })
     elseif drawingType == "Triangle" then
         local triangleObj = ({
-            PointA = Vector2zero,
-            PointB = Vector2zero,
-            PointC = Vector2zero,
+            PointA = Vector2_zero,
+            PointB = Vector2_zero,
+            PointC = Vector2_zero,
             Thickness = 1,
             Filled = false
         } + baseDrawingObj)
@@ -506,6 +519,7 @@ function DrawingLib.new(drawingType)
                         for _, linePoint in _linePoints do
                             linePoint:Remove()
                         end
+
                         triangleObj.Remove(self)
                         return triangleObj:Remove()
                     end
@@ -516,4 +530,4 @@ function DrawingLib.new(drawingType)
     end
 end
 
-return DrawingLib
+return DrawingLib;
