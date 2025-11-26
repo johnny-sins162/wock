@@ -1,0 +1,22 @@
+-- creates folder for niche
+makefolder("slime krew")
+-- makes script holders
+    if not isfile("slime krew/legit.lua") == true then --checks if placeholder script is changed for something else
+writefile("slime krew/legit.lua", "print('legit')") --only writes if there is no placeholder script
+end
+    if not isfile("slime krew/legit.lua") == true then --same logic
+writefile("slime krew/rage.lua", "print('rage')") --same logic
+end
+
+local version = "rage" -- legit or rage
+local loader
+
+if version == "legit" then --loads legit if version == legit
+    loader = loadfile("slime krew/legit.lua")
+elseif version == "rage" then
+    loader = loadfile("slime krew/rage.lua") --same logic
+else 
+    loader = function() print("version not found") end --prints version not found if version is invalid
+end
+
+loader() --call
